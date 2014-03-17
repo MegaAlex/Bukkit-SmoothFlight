@@ -2,18 +2,14 @@ package me.cmesh.SmoothFlight;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.*;
+import java.util.logging.Filter;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import ru.tehkode.permissions.PermissionManager;
-import ru.tehkode.permissions.bukkit.PermissionsEx;
-
-import com.nijiko.permissions.PermissionHandler;
 
 public class SmoothFlight extends JavaPlugin
 {
@@ -29,15 +25,12 @@ public class SmoothFlight extends JavaPlugin
 	public int minHeight;
 	public List<String> worlds;
 	public List<String> dreamWorlds;
-    public PermissionHandler permissionsPlugin = null;
-    public PermissionManager permissionsExPlugin = null;
 	
 	private SFPlayerListener listener;
 	
 	@Override
 	public void onEnable()
 	{
-		setupPermissions();
 		config();
 		listener = new SFPlayerListener(this);
 		fixLogger();
@@ -99,29 +92,5 @@ public class SmoothFlight extends JavaPlugin
                 return true;
             }
         });
-	}
-	
-	public boolean PermissionEnabled()
-	{
-		return permissionsPlugin != null;
-	}
-	public boolean PermissionExEnabled()
-	{
-		return permissionsExPlugin != null;
-	}
-	
-	private void setupPermissions()
-	{
-		Plugin p = getServer().getPluginManager().getPlugin("Permissions");
-		if (p != null && p.isEnabled()) 
-		{
-			permissionsPlugin = ((com.nijikokun.bukkit.Permissions.Permissions)p).getHandler();
-		}
-		
-		Plugin q = getServer().getPluginManager().getPlugin("PermissionsEx");
-        if (q != null && q.isEnabled()) 
-        {
-        	permissionsExPlugin = PermissionsEx.getPermissionManager();
-        }
 	}
 }

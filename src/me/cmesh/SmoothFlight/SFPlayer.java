@@ -1,7 +1,9 @@
 package me.cmesh.SmoothFlight;
 
 import java.util.Random;
+import java.util.UUID;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
@@ -10,38 +12,31 @@ public class SFPlayer
 {
 	private static SmoothFlight plugin;
 	
-	private Player player;
+	private UUID playerUUID;
 	private Long lastFly;
 	private boolean hover;
 	
 	public SFPlayer(Player player, SmoothFlight instance)
 	{
-		this.player = player;
+		this.playerUUID = player.getUniqueId();
 		plugin = instance;
 	}
 	
 	public Material getTool()
 	{
-		return player.getItemInHand().getType();
+		return getPlayer(playerUUID).getItemInHand().getType();
 	}
 	
 	private boolean hasPermission(String permission)
 	{
-		boolean permissions = false;
-		boolean permissionsEx = false;
-		if(plugin.PermissionEnabled())
-		{
-			permissions = plugin.permissionsPlugin.permission(player, permission);
-		}
-		if(plugin.PermissionExEnabled())
-		{
-			permissionsEx = plugin.permissionsExPlugin.has(player, permission);
-		}
-		return player.isOp() || player.hasPermission(permission) || permissions || permissionsEx;
+		Player player = getPlayer(playerUUID);
+		return player.isOp() || player.hasPermission(permission);
 	}
 	
 	public boolean canFly()
 	{
+		Player player = getPlayer(playerUUID);
+		
 		boolean correctTool = plugin.flyTool == player.getItemInHand().getType();
 		boolean hasFood = player.getFoodLevel() > 0;
 		Material block = player.getLocation().getBlock().getType();
@@ -56,6 +51,7 @@ public class SFPlayer
 	}
 	public void fly()
 	{
+		Player player = getPlayer(playerUUID);
 		if(plugin.smoke)
 			SmokeUtil.spawnCloudRandom(player.getLocation(), 4);
 		
@@ -88,6 +84,7 @@ public class SFPlayer
 	
 	public void hover()
 	{
+		Player player = getPlayer(playerUUID);
 		if(player.getFoodLevel() <= 1 || player.getItemInHand().getType() != plugin.flyTool)
 			hover = false;
 		
@@ -104,12 +101,24 @@ public class SFPlayer
 
 	private void hunger(int hunger)
 	{
+		Player player = getPlayer(playerUUID);
 		if((!player.isOp() || plugin.opHunger) && !hasPermission("smoothflight.nohunger") && new Random().nextInt(100) < hunger)
 			player.setFoodLevel(player.getFoodLevel()-1);
 	}
 	
 	public boolean isFlying() 
 	{
-		return lastFly != null && lastFly >= (player.getWorld().getTime() - 100);
+		return lastFly != null && lastFly >= (getPlayer(playerUUID).getWorld().getTime() - 100);
+	}
+	
+	private Player getPlayer(UUID id) {
+		
+		for(Player p : Bukkit.getServer().getOnlinePlayers()) {
+			if(p.getUniqueId().equals(id)) {
+				return p;
+			}
+		}
+		
+		return null;
 	}
 }
